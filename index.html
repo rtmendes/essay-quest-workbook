@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" style=""><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Essay Quest: Interactive Writing Adventure</title>
+    <!-- Pico CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&amp;display=swap" rel="stylesheet">
+    <!-- Confetti JS -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+      :root {
+        --primary: #2c3e50;
+        --secondary: #34495e;
+        --accent-1: #3498db; /* Foundations - Blue */
+        --accent-2: #e67e22; /* Hooks - Orange */
+        --accent-3: #27ae60; /* Body - Green */
+        --accent-4: #9b59b6; /* Transitions - Purple */
+        --accent-5: #c0392b; /* Conclusion - Red */
+        --accent-6: #f1c40f; /* Complete - Gold */
+        --paper: #ffffff;
+        --text: #2c3e50;
+        --bg-light: #f8f9fa;
+        --success: #2ecc71;
+        --border-radius: 8px;
+        --nav-height: 70px;
+      }
+
+      [data-theme='dark'] {
+        --primary: #ecf0f1;
+        --secondary: #bdc3c7;
+        --paper: #1a1a1a;
+        --text: #ecf0f1;
+        --bg-light: #2c2c2c;
+      }
+
+      body {
+        font-family: 'Merriweather', serif;
+        color: var(--text);
+        background-color: var(--paper);
+        line-height: 1.6;
+        padding-top: var(--nav-height);
+        transition:
+          background-color 0.3s,
+          color 0.3s;
+      }
+
+      /* Sticky Navigation */
+      .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--nav-height);
+        background: var(--paper);
+        border-bottom: 1px solid #ddd;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav-brand {
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .nav-controls {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .xp-display {
+        background: var(--primary);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-family: 'Inter', sans-serif;
+        font-weight: bold;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      /* Progress Bar */
+      .progress-container {
+        position: fixed;
+        top: var(--nav-height);
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: #eee;
+        z-index: 999;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: var(--success);
+        width: 0%;
+        transition: width 0.5s ease;
+      }
+
+      /* Layout Containers */
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+
+      /* Typography */
+      h1,
+      h2,
+      h3,
+      h4,
+      h5 {
+        font-family: 'Inter', sans-serif;
+        color: var(--primary);
+      }
+
+      h1 {
+        text-align: center;
+        border-bottom: 3px solid var(--primary);
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: var(--secondary);
+        font-family: 'Inter', sans-serif;
+        font-style: italic;
+        margin-bottom: 40px;
+      }
+
+      /* Module Styling */
+      .module {
+        background: var(--paper);
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius);
+        margin-bottom: 40px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        transition: transform 0.2s;
+      }
+
+      .module-header {
+        padding: 20px;
+        background: var(--bg-light);
+        border-left: 8px solid #ccc;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .module-header:hover {
+        background-color: #f0f0f0;
+      }
+
+      [data-theme='dark'] .module-header:hover {
+        background-color: #333;
+      }
+
+      .mod-1 {
+        border-left-color: var(--accent-1);
+      }
+      .mod-2 {
+        border-left-color: var(--accent-2);
+      }
+      .mod-3 {
+        border-left-color: var(--accent-3);
+      }
+      .mod-4 {
+        border-left-color: var(--accent-4);
+      }
+      .mod-5 {
+        border-left-color: var(--accent-5);
+      }
+      .mod-6 {
+        border-left-color: var(--accent-6);
+      }
+
+      .module-title {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+      }
+
+      .module-content {
+        padding: 30px;
+        display: none; /* Collapsed by default */
+      }
+
+      .module-content.active {
+        display: block;
+        animation: slideDown 0.3s ease-out;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Content Boxes */
+      .box {
+        border: 1px solid #e0e0e0;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 4px;
+        background: var(--paper);
+      }
+
+      .box-theory {
+        background-color: #f8fbff;
+        border-left: 4px solid var(--accent-1);
+      }
+      .box-tip {
+        background-color: #e8f6f3;
+        border-left: 4px solid #1abc9c;
+      }
+      .box-warning {
+        background-color: #fdedec;
+        border-left: 4px solid #e74c3c;
+      }
+      .box-critical {
+        background-color: #fef9e7;
+        border-left: 4px solid #f1c40f;
+      }
+      .box-assignment {
+        border: 2px dashed #95a5a6;
+        background-color: #fafafa;
+      }
+
+      [data-theme='dark'] .box-theory {
+        background-color: #1c2833;
+      }
+      [data-theme='dark'] .box-tip {
+        background-color: #142824;
+      }
+      [data-theme='dark'] .box-warning {
+        background-color: #2c1e1e;
+      }
+      [data-theme='dark'] .box-critical {
+        background-color: #2c281e;
+      }
+      [data-theme='dark'] .box-assignment {
+        background-color: #2c2c2c;
+      }
+
+      /* Interactive Writing Areas */
+      textarea.writing-area {
+        width: 100%;
+        min-height: 150px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: 'Merriweather', serif;
+        font-size: 1rem;
+        margin-top: 10px;
+        background: var(--paper);
+        color: var(--text);
+        resize: vertical;
+      }
+
+      textarea.writing-area:focus {
+        border-color: var(--accent-1);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      }
+
+      /* Checkboxes */
+      .custom-checkbox {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+
+      .custom-checkbox:hover {
+        background: rgba(0, 0, 0, 0.05);
+      }
+
+      .custom-checkbox input {
+        margin-right: 12px;
+        width: 20px;
+        height: 20px;
+        accent-color: var(--success);
+      }
+
+      /* Badges */
+      .badge-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+        padding: 20px;
+        background: var(--bg-light);
+        border-radius: var(--border-radius);
+      }
+
+      .badge-item {
+        text-align: center;
+        opacity: 0.3;
+        filter: grayscale(100%);
+        transition: all 0.5s ease;
+      }
+
+      .badge-item.unlocked {
+        opacity: 1;
+        filter: grayscale(0%);
+        transform: scale(1.1);
+      }
+
+      .badge-icon {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      .badge-name {
+        font-size: 0.8rem;
+        font-family: 'Inter', sans-serif;
+        font-weight: bold;
+      }
+
+      /* Buttons */
+      .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        transition: opacity 0.2s;
+        font-size: 0.9rem;
+      }
+
+      .btn:hover {
+        opacity: 0.9;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+      .btn-outline {
+        background: transparent;
+        border: 1px solid var(--primary);
+        color: var(--primary);
+      }
+      .btn-success {
+        background: var(--success);
+        color: white;
+      }
+
+      [data-theme='dark'] .btn-outline {
+        border-color: #ecf0f1;
+        color: #ecf0f1;
+      }
+
+      /* Utility */
+      .hidden {
+        display: none !important;
+      }
+      .text-center {
+        text-align: center;
+      }
+      .flex-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .mt-20 {
+        margin-top: 20px;
+      }
+
+      .word-count {
+        font-size: 0.8rem;
+        color: #666;
+        text-align: right;
+        margin-top: 5px;
+      }
+
+      /* Floating Action Button */
+      .fab-menu {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000;
+      }
+
+      .fab-main {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--accent-1);
+        color: white;
+        border: none;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .fab-options {
+        position: absolute;
+        bottom: 70px;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+
+      .fab-menu:hover .fab-options {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .fab-btn {
+        background: var(--primary);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 20px;
+        border: none;
+        cursor: pointer;
+        white-space: nowrap;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        font-size: 0.9rem;
+      }
+
+      /* Feature Grid */
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin: 30px 0;
+      }
+
+      .feature-card {
+        background: var(--bg-light);
+        border: 2px solid #ddd;
+        border-radius: var(--border-radius);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-family: 'Inter', sans-serif;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent-1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .feature-icon {
+        font-size: 2.5rem;
+      }
+
+      .feature-label {
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 2000;
+        overflow-y: auto;
+      }
+
+      .modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-content {
+        background: var(--paper);
+        padding: 30px;
+        border-radius: var(--border-radius);
+        max-width: 800px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+      }
+
+      .modal-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text);
+      }
+
+      /* Timer Widget */
+      .timer-widget {
+        position: fixed;
+        top: 100px;
+        right: 30px;
+        background: var(--paper);
+        border: 2px solid var(--accent-1);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        display: none;
+        font-family: 'Inter', sans-serif;
+        text-align: center;
+      }
+
+      .timer-widget.active {
+        display: block;
+      }
+
+      .timer-display {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--primary);
+        margin: 10px 0;
+      }
+
+      .timer-controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 15px;
+      }
+
+      /* Tips Dropdown */
+      .tips-section {
+        background: #fffbea;
+        border-left: 4px solid #f1c40f;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 4px;
+      }
+
+      .tips-toggle {
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+        color: var(--primary);
+      }
+
+      .tips-content {
+        display: none;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #ddd;
+      }
+
+      .tips-content.active {
+        display: block;
+      }
+
+      /* Dashboard Stats */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+      }
+
+      .stat-card {
+        background: var(--bg-light);
+        padding: 20px;
+        border-radius: var(--border-radius);
+        text-align: center;
+        border-left: 4px solid var(--accent-1);
+      }
+
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--primary);
+        display: block;
+      }
+
+      .stat-label {
+        font-size: 0.9rem;
+        color: var(--secondary);
+        margin-top: 5px;
+      }
+
+      /* Sample Essay Styling */
+      .essay-sample {
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 4px;
+        font-family: 'Merriweather', serif;
+      }
+
+      .essay-sample h4 {
+        margin-top: 0;
+        color: var(--accent-1);
+      }
+
+      /* Video Container */
+      .video-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+      }
+
+      .video-card {
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        background: var(--bg-light);
+      }
+
+      .video-card iframe {
+        width: 100%;
+        height: 200px;
+        border: none;
+      }
+
+      .video-info {
+        padding: 15px;
+      }
+
+      .video-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-family: 'Inter', sans-serif;
+      }
+
+      /* Print Styles */
+      @media print {
+        .navbar,
+        .progress-container,
+        .fab-menu,
+        .btn,
+        .nav-controls {
+          display: none !important;
+        }
+
+        body {
+          padding-top: 0;
+          font-size: 12pt;
+          background: white !important;
+          color: black !important;
+        }
+
+        .module {
+          border: none;
+          box-shadow: none;
+          margin-bottom: 0;
+          page-break-inside: avoid;
+        }
+
+        .module-content {
+          display: block !important; /* Force expand all */
+          animation: none;
+        }
+
+        .module-header {
+          background: none !important;
+          border-left: none !important;
+          border-bottom: 2px solid #000;
+          padding-left: 0;
+        }
+
+        textarea {
+          border: 1px solid #000 !important;
+          min-height: 100px;
+          page-break-inside: avoid;
+        }
+
+        .box {
+          border: 1px solid #000;
+          background: none !important;
+        }
+
+        a[href]:after {
+          content: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body style="">
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-fill" id="progressBar"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-brand">
+        <span>🏰 Essay Quest</span>
+      </div>
+
+      <div class="nav-controls">
+        <div class="xp-display">
+          <span>✨</span>
+          <span id="xpDisplay">0</span>
+          <span>XP</span>
+        </div>
+
+        <button class="btn btn-outline" id="themeToggle" title="Toggle Theme">🌙</button>
+        <button class="btn btn-outline" id="resetBtn" title="Reset Progress">🔄</button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <h1>ESSAY QUEST</h1>
+      <div class="subtitle">A Comprehensive Module-Based Writing System for Critical Thinking Mastery</div>
+
+      <!-- Badge Showcase -->
+      <div class="box">
+        <h3 class="text-center">🏆 Your Trophy Case</h3>
+        <div class="badge-container">
+          <div class="badge-item" id="badge1">
+            <span class="badge-icon">🧢</span>
+            <div class="badge-name">Writer Rookie</div>
+          </div>
+          <div class="badge-item" id="badge2">
+            <span class="badge-icon">💡</span>
+            <div class="badge-name">Idea Explorer</div>
+          </div>
+          <div class="badge-item" id="badge3">
+            <span class="badge-icon">🧱</span>
+            <div class="badge-name">Paragraph Pro</div>
+          </div>
+          <div class="badge-item" id="badge4">
+            <span class="badge-icon">🏗️</span>
+            <div class="badge-name">Essay Architect</div>
+          </div>
+          <div class="badge-item" id="badge5">
+            <span class="badge-icon">🏁</span>
+            <div class="badge-name">Closing Champ</div>
+          </div>
+          <div class="badge-item" id="badge6">
+            <span class="badge-icon">👑</span>
+            <div class="badge-name">Master Wordsmith</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Program Overview -->
+      <div class="box box-theory">
+        <h3>👋 Welcome, Adventurer!</h3>
+        <p>
+          This isn't just a workbook—it's a training ground. Your mission is to master the art of the essay. Complete
+          modules, earn XP, unlock badges, and become a Master Wordsmith.
+        </p>
+        <p>
+          <strong>How to Save:</strong> Everything you type and check off is automatically saved to your browser. You
+          can close this tab and come back anytime!
+        </p>
+      </div>
+
+      <!-- Quick Access Features -->
+      <div class="feature-grid">
+        <button class="feature-card" onclick="showParentDashboard()">
+          <span class="feature-icon">👨‍👩‍👧</span>
+          <span class="feature-label">Parent Dashboard</span>
+        </button>
+        <button class="feature-card" onclick="showSampleLibrary()">
+          <span class="feature-icon">📚</span>
+          <span class="feature-label">Sample Essays</span>
+        </button>
+        <button class="feature-card" onclick="showVideoTutorials()">
+          <span class="feature-icon">🎥</span>
+          <span class="feature-label">Video Tutorials</span>
+        </button>
+        <button class="feature-card" onclick="toggleTimer()">
+          <span class="feature-icon">⏱️</span>
+          <span class="feature-label">30-Min Timer</span>
+        </button>
+      </div>
+
+      <!-- Module 1 -->
+      <div class="module" id="mod1">
+        <div class="module-header mod-1" onclick="toggleModule('mod1-content')">
+          <div>
+            <h2 class="module-title">1. Foundations: The Structure</h2>
+            <small>Reward: 100 XP + "Writer Rookie" Badge</small>
+          </div>
+          <span class="module-status" id="status-mod1">🔒</span>
+        </div>
+        <div class="module-content active" id="mod1-content">
+          <div class="box box-theory">
+            <h3>The Hamburger Method 🍔</h3>
+            <p>
+              An essay is like a burger. If you miss the buns, it's a mess. Use the "Rule of Three": Intro, Body,
+              Conclusion.
+            </p>
+          </div>
+
+          <div class="tips-section">
+            <div class="tips-toggle" onclick="toggleTips('tips-mod1')">
+              💡 Need Help? Click for Tips &amp; Hints
+              <span>▼</span>
+            </div>
+            <div class="tips-content" id="tips-mod1">
+              <p><strong>🎯 Pro Tip:</strong> Start with your body paragraph first! It's easier to write the intro when you know what you're introducing.</p>
+              <p><strong>🚀 Quick Start:</strong> Use sentence starters like "I believe that..." or "One superpower I would choose is..."</p>
+              <p><strong>⚡ Stuck?</strong> Try talking it out loud first. Pretend you're explaining to a friend!</p>
+              <p><strong>📝 Length Guide:</strong> Intro (3-4 sentences), Body (5-7 sentences), Conclusion (3-4 sentences)</p>
+            </div>
+          </div>
+
+          <div class="box box-assignment">
+            <h3>📝 Mission 3u. 1: My Superpower</h3>
+            <p>Write a simple 3-paragraph structure about a superpower you want.</p>
+
+            <label><strong>1. Introduction (The Top Bun)</strong></label>
+            <textarea class="writing-area" id="input-mod1-intro" placeholder="I would choose teleportation because..."></textarea>
+
+            <label class="mt-20"><strong>2. Body (The Meat)</strong></label>
+            <textarea class="writing-area" id="input-mod1-body" placeholder="For example, I could visit Paris for lunch..."></textarea>
+
+            <label class="mt-20"><strong>3. Conclusion (The Bottom Bun)</strong></label>
+            <textarea class="writing-area" id="input-mod1-concl" placeholder="In short, this power would make life an adventure..."></textarea>
+          </div>
+
+          <h4>✅ Success Checklist</h4>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="30" data-mod="mod1"> Has a clear beginning (Intro)
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="30" data-mod="mod1"> Gives an example (Body)
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="40" data-mod="mod1"> Feels finished (Conclusion)
+          </label>
+
+          <button class="btn btn-success mt-20" onclick="completeModule('mod1', 'badge1')">
+            Mark Module as Complete
+          </button>
+        </div>
+      </div>
+
+      <!-- Module 2 -->
+      <div class="module" id="mod2">
+        <div class="module-header mod-2" onclick="toggleModule('mod2-content')">
+          <div>
+            <h2 class="module-title">2. The Hook: Capturing Attention</h2>
+            <small>Reward: 120 XP + "Idea Explorer" Badge</small>
+          </div>
+          <span class="module-status" id="status-mod2">🔒</span>
+        </div>
+        <div class="module-content" id="mod2-content">
+          <div class="box box-deep-dive">
+            <h3>5 Types of Hooks 🎣</h3>
+            <ul>
+              <li><strong>Question:</strong> "Have you ever wondered...?"</li>
+              <li><strong>Fact:</strong> "90% of people hate waiting."</li>
+              <li><strong>Story:</strong> "The rain lashed against the window..."</li>
+              <li><strong>Quote:</strong> "As Yoda said, 'Do or do not'..."</li>
+              <li><strong>Description:</strong> "The smell of burnt popcorn..."</li>
+            </ul>
+          </div>
+
+          <div class="tips-section">
+            <div class="tips-toggle" onclick="toggleTips('tips-mod2')">
+              💡 Need Help? Click for Hook Ideas
+              <span>▼</span>
+            </div>
+            <div class="tips-content" id="tips-mod2">
+              <p><strong>Question Hook Example:</strong> "Have you ever been grounded from video games and felt like your world ended?"</p>
+              <p><strong>Fact Hook Example:</strong> "Studies show that 72% of surgeons play video games to improve hand-eye coordination."</p>
+              <p><strong>Story Hook Example:</strong> "Last summer, I was stuck in bed with a broken leg. The only thing that saved my sanity? Video games."</p>
+              <p><strong>🎯 Best Practice:</strong> The weirder or more surprising your hook, the better! Make your reader go "Wait, what?!"</p>
+            </div>
+          </div>
+
+          <div class="box box-assignment">
+            <h3>📝 Mission 2: Hook Workshop</h3>
+            <p>Write 3 DIFFERENT hooks for the topic: <em>"Why Video Games Are Good."</em></p>
+
+            <textarea class="writing-area" id="input-mod2-hooks" placeholder="1. Question Hook: ...
+2. Fact Hook: ...
+3. Story Hook: ..."></textarea>
+          </div>
+
+          <h4>✅ Success Checklist</h4>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="40" data-mod="mod2"> Wrote a Question Hook
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="40" data-mod="mod2"> Wrote a Fact Hook
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="40" data-mod="mod2"> Wrote a Story Hook
+          </label>
+
+          <button class="btn btn-success mt-20" onclick="completeModule('mod2', 'badge2')">
+            Mark Module as Complete
+          </button>
+        </div>
+      </div>
+
+      <!-- Module 3 -->
+      <div class="module" id="mod3">
+        <div class="module-header mod-3" onclick="toggleModule('mod3-content')">
+          <div>
+            <h2 class="module-title">3. Body Paragraphs: PEEL Method</h2>
+            <small>Reward: 130 XP + "Paragraph Pro" Badge</small>
+          </div>
+          <span class="module-status" id="status-mod3">🔒</span>
+        </div>
+        <div class="module-content" id="mod3-content">
+          <div class="box box-theory">
+            <h3>The PEEL Structure 🍌</h3>
+            <p>
+              <strong>P</strong>oint: Main idea.<br>
+              <strong>E</strong>vidence: Proof/Example.<br>
+              <strong>E</strong>xplanation: So what?<br>
+              <strong>L</strong>ink: Connect to next idea.
+            </p>
+          </div>
+
+          <div class="tips-section">
+            <div class="tips-toggle" onclick="toggleTips('tips-mod3')">
+              💡 Need Help? PEEL Method Breakdown
+              <span>▼</span>
+            </div>
+            <div class="tips-content" id="tips-mod3">
+              <p><strong>Point Example:</strong> "Longer school breaks would improve student mental health."</p>
+              <p><strong>Evidence Example:</strong> "According to a 2023 study by Stanford University, students with adequate rest periods show 40% less anxiety."</p>
+              <p><strong>Explanation Example:</strong> "This means that when students have time to recharge, they return to school more focused and less stressed."</p>
+              <p><strong>Link Example:</strong> "Therefore, extending breaks would create happier, more productive learners."</p>
+              <p><strong>🎯 Remember:</strong> The Explanation is where you show you're THINKING, not just copying facts!</p>
+            </div>
+          </div>
+
+          <div class="box box-assignment">
+            <h3>📝 Mission 3: Evidence Detective</h3>
+            <p>Write ONE perfect PEEL paragraph arguing: <em>"School breaks should be longer."</em></p>
+            <textarea class="writing-area" id="input-mod3-peel" placeholder="School breaks are essential for mental health (Point). Studies show... (Evidence). This means... (Explanation). Therefore... (Link)."></textarea>
+          </div>
+
+          <h4>✅ Success Checklist</h4>
+          <label class="custom-checkbox"> <input type="checkbox" data-xp="30" data-mod="mod3"> Clear Point </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="30" data-mod="mod3"> Specific Evidence
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="30" data-mod="mod3"> Explanation (The "So What?")
+          </label>
+          <label class="custom-checkbox"> <input type="checkbox" data-xp="40" data-mod="mod3"> Link Sentence </label>
+
+          <button class="btn btn-success mt-20" onclick="completeModule('mod3', 'badge3')">
+            Mark Module as Complete
+          </button>
+        </div>
+      </div>
+
+      <!-- Module 4 -->
+      <div class="module" id="mod4">
+        <div class="module-header mod-4" onclick="toggleModule('mod4-content')">
+          <div>
+            <h2 class="module-title">4. Transitions: The Bridges</h2>
+            <small>Reward: 140 XP + "Essay Architect" Badge</small>
+          </div>
+          <span class="module-status" id="status-mod4">🔒</span>
+        </div>
+        <div class="module-content" id="mod4-content">
+          <div class="box box-tip">
+            <h3>Transition Word Bank 🌉</h3>
+            <p>
+              <strong>Adding:</strong> Also, Furthermore, In addition<br>
+              <strong>Contrasting:</strong> However, But, On the other hand<br>
+              <strong>Causing:</strong> Therefore, So, Because of this
+            </p>
+          </div>
+
+          <div class="tips-section">
+            <div class="tips-toggle" onclick="toggleTips('tips-mod4')">
+              💡 Need Help? Transition Tricks
+              <span>▼</span>
+            </div>
+            <div class="tips-content" id="tips-mod4">
+              <p><strong>Example Rewrite:</strong> "Although pizza is delicious, it can be quite greasy. However, I still eat it frequently because it's convenient. Unfortunately, my doctor has advised me to cut back on fatty foods. Therefore, I'm now searching for healthier alternatives."</p>
+              <p><strong>🎯 Power Move:</strong> Start sentences with transition words to create instant flow!</p>
+              <p><strong>⚡ Advanced Tip:</strong> Use different transitions—don't repeat "however" three times in a row!</p>
+            </div>
+          </div>
+
+          <div class="box box-assignment">
+            <h3>📝 Mission 4: Flow Fixer</h3>
+            <p>Rewrite this choppy paragraph using at least 3 transition words:</p>
+            <p><em>"Pizza is good. It is greasy. I eat it often. My doctor says stop."</em></p>
+            <textarea class="writing-area" id="input-mod4-trans" placeholder="Although pizza is good, it is greasy. Therefore..."></textarea>
+          </div>
+
+          <h4>✅ Success Checklist</h4>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="40" data-mod="mod4"> Used "However" or similar
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="40" data-mod="mod4"> Used "Therefore" or similar
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="60" data-mod="mod4"> Sounds smooth to read
+          </label>
+
+          <button class="btn btn-success mt-20" onclick="completeModule('mod4', 'badge4')">
+            Mark Module as Complete
+          </button>
+        </div>
+      </div>
+
+      <!-- Module 5 -->
+      <div class="module" id="mod5">
+        <div class="module-header mod-5" onclick="toggleModule('mod5-content')">
+          <div>
+            <h2 class="module-title">5. Conclusions: The Mic Drop</h2>
+            <small>Reward: 150 XP + "Closing Champ" Badge</small>
+          </div>
+          <span class="module-status" id="status-mod5">🔒</span>
+        </div>
+        <div class="module-content" id="mod5-content">
+          <div class="box box-warning">
+            <p>
+              ⚠️ <strong>Never</strong> start with "In conclusion." It's boring! Try predicting the future or giving a
+              call to action instead.
+            </p>
+          </div>
+
+          <div class="tips-section">
+            <div class="tips-toggle" onclick="toggleTips('tips-mod5')">
+              💡 Need Help? Powerful Conclusion Strategies
+              <span>▼</span>
+            </div>
+            <div class="tips-content" id="tips-mod5">
+              <p><strong>Strategy 1 - Future Prediction:</strong> "In ten years, people who can't cook will spend twice as much on food as those who learned this essential skill."</p>
+              <p><strong>Strategy 2 - Call to Action:</strong> "Don't wait until you're hungry and broke. Start with scrambled eggs tonight!"</p>
+              <p><strong>Strategy 3 - Big Picture:</strong> "Cooking isn't just about food—it's about independence, creativity, and taking control of your health."</p>
+              <p><strong>🎯 Secret Weapon:</strong> End with a mic-drop sentence that makes readers think long after they finish reading!</p>
+            </div>
+          </div>
+
+          <div class="box box-assignment">
+            <h3>📝 Mission 5: The Final Word</h3>
+            <p>Write a powerful conclusion for an essay about <em>"Why Everyone Should Learn to Cook."</em></p>
+            <textarea class="writing-area" id="input-mod5-concl" placeholder="Cooking is not just a chore; it is freedom. If we rely on fast food..."></textarea>
+          </div>
+
+          <h4>✅ Success Checklist</h4>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="50" data-mod="mod5"> Restated main idea
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="50" data-mod="mod5"> Predicted future or Call to Action
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="50" data-mod="mod5"> avoided "In conclusion"
+          </label>
+
+          <button class="btn btn-success mt-20" onclick="completeModule('mod5', 'badge5')">
+            Mark Module as Complete
+          </button>
+        </div>
+      </div>
+
+      <!-- Module 6 -->
+      <div class="module" id="mod6">
+        <div class="module-header mod-6" onclick="toggleModule('mod6-content')">
+          <div>
+            <h2 class="module-title">6. The Grand Finale</h2>
+            <small>Reward: 200 XP + "Master Wordsmith" Badge</small>
+          </div>
+          <span class="module-status" id="status-mod6">🔒</span>
+        </div>
+        <div class="module-content" id="mod6-content">
+          <div class="box box-critical">
+            <h3>🏆 The Boss Fight</h3>
+            <p>This is it. Put it all together. Write a full 5-paragraph essay on a topic of your choice.</p>
+          </div>
+
+          <div class="tips-section">
+            <div class="tips-toggle" onclick="toggleTips('tips-mod6')">
+              💡 Need Help? Full Essay Checklist
+              <span>▼</span>
+            </div>
+            <div class="tips-content" id="tips-mod6">
+              <p><strong>📋 Complete Essay Structure:</strong></p>
+              <ul>
+                <li><strong>Paragraph 1:</strong> Hook + Background + Thesis Statement</li>
+                <li><strong>Paragraph 2:</strong> First reason/point (PEEL format)</li>
+                <li><strong>Paragraph 3:</strong> Second reason/point (PEEL format)</li>
+                <li><strong>Paragraph 4:</strong> Third reason/point (PEEL format)</li>
+                <li><strong>Paragraph 5:</strong> Restate thesis + Final thoughts + Powerful ending</li>
+              </ul>
+              <p><strong>🎯 Topic Ideas:</strong> "Why [hobby] changed my life" | "The best lesson I learned from failure" | "If I could change one rule at school"</p>
+              <p><strong>⏱️ Time Management:</strong> Planning (5 min) → Writing (20 min) → Editing (5 min)</p>
+            </div>
+          </div>
+
+          <div class="box box-assignment">
+            <h3>📝 Final Mission: Full Essay</h3>
+            <textarea class="writing-area" style="min-height: 400px" id="input-mod6-essay" placeholder="Title: ...
+
+Intro: ...
+
+Body 1: ...
+
+Body 2: ...
+
+Body 3: ...
+
+Conclusion: ..."></textarea>
+            <div class="word-count" id="finalWordCount">0 words</div>
+          </div>
+
+          <h4>✅ Final Checklist</h4>
+          <label class="custom-checkbox"> <input type="checkbox" data-xp="40" data-mod="mod6"> Strong Hook </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="40" data-mod="mod6"> 3 Body Paragraphs (PEEL)
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="40" data-mod="mod6"> Transition Words
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="40" data-mod="mod6"> Powerful Conclusion
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" data-xp="40" data-mod="mod6"> Self-Edited for Spelling
+          </label>
+
+          <button class="btn btn-success mt-20" onclick="completeModule('mod6', 'badge6')">FINISH COURSE</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <div class="fab-menu">
+      <div class="fab-options">
+        <button class="fab-btn" onclick="window.print()">🖨️ Print Workbook</button>
+        <button class="fab-btn" onclick="exportData()">💾 Export Save</button>
+      </div>
+      <button class="fab-main" title="Menu">➕</button>
+    </div>
+
+    <!-- Timer Widget -->
+    <div class="timer-widget" id="timerWidget">
+      <h4>⏱️ Focus Timer</h4>
+      <div class="timer-display" id="timerDisplay">30:00</div>
+      <div class="timer-controls">
+        <button class="btn btn-primary" id="startTimer">Start</button>
+        <button class="btn btn-outline" id="pauseTimer">Pause</button>
+        <button class="btn btn-outline" id="resetTimer">Reset</button>
+      </div>
+      <button class="modal-close" onclick="toggleTimer()">✕</button>
+    </div>
+
+    <!-- Parent Dashboard Modal -->
+    <div class="modal" id="parentDashboard">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('parentDashboard')">✕</button>
+        <h2>👨‍👩‍👧 Parent &amp; Mentor Dashboard</h2>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-value" id="dashXP">0</span>
+            <span class="stat-label">Total XP Earned</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="dashModules">0/6</span>
+            <span class="stat-label">Modules Complete</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="dashBadges">0/6</span>
+            <span class="stat-label">Badges Unlocked</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="dashWords">0</span>
+            <span class="stat-label">Words Written</span>
+          </div>
+        </div>
+
+        <div class="box box-tip">
+          <h3>🎯 Support Strategies</h3>
+          <h4>What to Do:</h4>
+          <ul>
+            <li>✅ Celebrate small wins—every checkbox matters!</li>
+            <li>✅ Read their work out loud together to catch errors</li>
+            <li>✅ Ask guiding questions: "What do you mean by this?"</li>
+            <li>✅ Provide snacks and breaks during longer sessions</li>
+          </ul>
+          
+          <h4>What NOT to Do:</h4>
+          <ul>
+            <li>❌ Don't rewrite their sentences for them</li>
+            <li>❌ Don't compare to siblings or other students</li>
+            <li>❌ Don't expect perfection on first drafts</li>
+            <li>❌ Don't force 30 minutes if they're truly stuck—take a break</li>
+          </ul>
+        </div>
+
+        <div class="box box-warning">
+          <h3>🚨 Red Flags to Watch For</h3>
+          <ul>
+            <li>Student stares at blank screen for 10+ minutes → <strong>Action:</strong> Start with verbal brainstorming</li>
+            <li>Excessive erasing/deleting → <strong>Action:</strong> Remind them: "First drafts are supposed to be messy!"</li>
+            <li>Frustration tears or anger → <strong>Action:</strong> Stop, take a 10-minute break, try again later</li>
+            <li>Copying sample essays word-for-word → <strong>Action:</strong> Explain plagiarism gently; use samples as inspiration only</li>
+          </ul>
+        </div>
+
+        <div class="box box-theory">
+          <h3>📊 Progress Interpretation Guide</h3>
+          <p><strong>0-200 XP:</strong> Just getting started. Focus on building confidence, not perfection.</p>
+          <p><strong>200-500 XP:</strong> Foundations are forming. Look for improved structure in their writing.</p>
+          <p><strong>500-700 XP:</strong> Strong progress! They're integrating multiple skills.</p>
+          <p><strong>700-840 XP:</strong> Course complete! Time to celebrate with their favorite treat!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sample Library Modal -->
+    <div class="modal" id="sampleLibrary">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('sampleLibrary')">✕</button>
+        <h2>📚 Sample Essay Library</h2>
+        <p><em>Use these as inspiration and learning tools—never copy word-for-word!</em></p>
+
+        <div class="essay-sample">
+          <h4>Sample 1: "My Superpower Would Be Time Travel" (Module 1 Level)</h4>
+          <p><strong>[Introduction]</strong> If I could choose any superpower, I would pick time travel without hesitation. While flying or invisibility sound cool, being able to visit any moment in history would be the ultimate adventure. This power would let me learn from the past and glimpse the future.</p>
+          
+          <p><strong>[Body]</strong> For example, I could witness major historical events like the moon landing or meet famous people like Albert Einstein. I would also travel to see my grandparents when they were young to understand their lives better. Plus, if I made a huge mistake, I could just go back and fix it—talk about a do-over button!</p>
+          
+          <p><strong>[Conclusion]</strong> In short, time travel would turn life into one giant learning experience. Every day would be a chance to explore, learn, and grow in ways no other superpower could match.</p>
+        </div>
+
+        <div class="essay-sample">
+          <h4>Sample 2: "Why Video Games Are Actually Educational" (Full 5-Paragraph)</h4>
+          <p><strong>[Introduction - Note the HOOK]</strong> Have you ever been told to stop "wasting time" on video games? Parents and teachers often see gaming as mindless entertainment, but research proves they're wrong. Video games actually develop critical skills that help us in school and real life. From problem-solving to teamwork, gaming is far more educational than most people realize.</p>
+          
+          <p><strong>[Body Paragraph 1 - PEEL Structure]</strong> First, video games dramatically improve problem-solving abilities. <em>[Evidence]</em> Strategy games like Civilization or Portal require players to think several steps ahead and adapt when plans fail. <em>[Explanation]</em> This means gamers are constantly training their brains to analyze complex situations and find creative solutions—exactly what we do in math class or science projects. <em>[Link]</em> Therefore, gaming serves as a mental gym that strengthens analytical thinking.</p>
+          
+          <p><strong>[Body Paragraph 2 - PEEL Structure]</strong> Additionally, multiplayer games teach teamwork and communication. <em>[Evidence]</em> Games like Fortnite and Minecraft require players to coordinate strategies, divide tasks, and support each other to win. <em>[Explanation]</em> These are the exact collaboration skills employers look for in the workplace. <em>[Link]</em> In other words, gaming prepares us for group projects and future careers more effectively than most people assume.</p>
+          
+          <p><strong>[Body Paragraph 3 - PEEL Structure]</strong> Finally, many games teach real academic content in engaging ways. <em>[Evidence]</em> Assassin's Creed games feature historically accurate settings, while Kerbal Space Program teaches actual physics and engineering concepts. <em>[Explanation]</em> Students remember information better when they're actively engaged rather than passively reading textbooks. <em>[Link]</em> Consequently, educational gaming creates deeper, longer-lasting learning.</p>
+          
+          <p><strong>[Conclusion - Note NO "In conclusion"]</strong> The next time someone tells you to stop gaming and "do something productive," you'll know better. Video games develop problem-solving, teamwork, and academic knowledge in ways traditional methods can't match. Perhaps it's time for parents and educators to press START and join the learning revolution happening in living rooms everywhere. <em>[Mic drop moment!]</em></p>
+        </div>
+
+        <div class="essay-sample">
+          <h4>Sample 3: "The Day I Failed and Why It Was the Best Thing Ever"</h4>
+          <p><strong>[Introduction with Story Hook]</strong> The gym was silent except for my racing heartbeat. I stared at the balance beam, knowing I had to nail this routine to make the team. Three seconds later, I was flat on the mat, my gymnastics dreams shattered. At the time, it felt like the end of the world. Looking back, that failure taught me more than any trophy ever could.</p>
+          
+          <p><strong>[Body 1]</strong> That fall forced me to discover what I was truly passionate about. <em>[Evidence]</em> After quitting gymnastics, I randomly joined the school robotics club to fill the time. Within weeks, I realized I loved engineering and coding far more than I ever enjoyed flips and routines. <em>[Explanation]</em> Sometimes we get so locked into one path that we don't see better options right in front of us. <em>[Link]</em> Failure cleared my vision and pointed me toward my real calling.</p>
+          
+          <p><strong>[Body 2]</strong> The experience also taught me resilience in a way success never could. <em>[Evidence]</em> While my friends who made the team coasted through practices, I had to rebuild my confidence from zero. I learned to handle embarrassment, pick myself up, and try new things despite fear of failing again. <em>[Explanation]</em> These mental skills matter far more in life than being able to do a cartwheel. <em>[Link]</em> Consequently, that painful moment became my greatest teacher.</p>
+          
+          <p><strong>[Body 3]</strong> Most importantly, failure made me more empathetic toward others who struggle. <em>[Evidence]</em> Now when classmates mess up presentations or bomb tests, I understand their frustration because I've been there. <em>[Explanation]</em> This empathy has helped me make deeper friendships and become a better teammate. <em>[Link]</em> Success might have made me confident, but failure made me kind.</p>
+          
+          <p><strong>[Conclusion with Future Prediction]</strong> That faceplant on the gym floor stung for weeks, but it redirected my entire future. Today, I'm captain of the robotics team heading to state championships—something that never would have happened if I'd made the gymnastics team. The next time you fail at something, don't just see the pain. Look for the hidden gift that failure is trying to hand you. It might just be the best thing that never worked out.</p>
+        </div>
+
+        <div class="box box-tip">
+          <h3>🎓 What Makes These Essays Work?</h3>
+          <ul>
+            <li>✅ <strong>Strong Hooks:</strong> Question, story opening, surprising statement</li>
+            <li>✅ <strong>Clear PEEL Structure:</strong> Every body paragraph follows the format</li>
+            <li>✅ <strong>Transition Words:</strong> Additionally, Therefore, Consequently, etc.</li>
+            <li>✅ <strong>Personal Voice:</strong> Sounds like a real person, not a robot</li>
+            <li>✅ <strong>No "In Conclusion":</strong> Powerful endings that make you think</li>
+            <li>✅ <strong>Specific Examples:</strong> Not vague—actual games, actual details</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video Tutorial Modal -->
+    <div class="modal" id="videoTutorials">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('videoTutorials')">✕</button>
+        <h2>🎥 Video Learning Library</h2>
+        <p><em>Watch these short tutorials to master essay writing skills visually.</em></p>
+
+        <div class="video-grid">
+          <div class="video-card">
+            <iframe src="https://www.youtube.com/embed/5Vvdp8g8Q8w" allowfullscreen=""></iframe>
+            <div class="video-info">
+              <div class="video-title">How to Write a 5-Paragraph Essay</div>
+              <small>Perfect overview for beginners | 10 minutes</small>
+            </div>
+          </div>
+
+          <div class="video-card">
+            <iframe src="https://www.youtube.com/embed/X9kGYqmQCN8" allowfullscreen=""></iframe>
+            <div class="video-info">
+              <div class="video-title">Writing the Perfect Hook</div>
+              <small>Learn 7 hook types with examples | 8 minutes</small>
+            </div>
+          </div>
+
+          <div class="video-card">
+            <iframe src="https://www.youtube.com/embed/SVBCW-CP5O4" allowfullscreen=""></iframe>
+            <div class="video-info">
+              <div class="video-title">Body Paragraphs Made Easy</div>
+              <small>PEEL method explained step-by-step | 6 minutes</small>
+            </div>
+          </div>
+
+          <div class="video-card">
+            <iframe src="https://www.youtube.com/embed/0IQz_WW9zJ0" allowfullscreen=""></iframe>
+            <div class="video-info">
+              <div class="video-title">Using Transition Words</div>
+              <small>Make your writing flow smoothly | 7 minutes</small>
+            </div>
+          </div>
+
+          <div class="video-card">
+            <iframe src="https://www.youtube.com/embed/UGlWBYB2g_o" allowfullscreen=""></iframe>
+            <div class="video-info">
+              <div class="video-title">How to Write Strong Conclusions</div>
+              <small>End your essay with impact | 5 minutes</small>
+            </div>
+          </div>
+
+          <div class="video-card">
+            <iframe src="https://www.youtube.com/embed/C-klZvWWOl0" allowfullscreen=""></iframe>
+            <div class="video-info">
+              <div class="video-title">Essay Editing &amp; Proofreading Tips</div>
+              <small>Polish your work like a pro | 9 minutes</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="box box-tip">
+          <h3>📺 How to Use These Videos</h3>
+          <p><strong>Before Writing:</strong> Watch the relevant video to understand the concept.</p>
+          <p><strong>During Writing:</strong> Keep videos open in another tab for quick reference.</p>
+          <p><strong>After Writing:</strong> Watch editing videos to improve your draft.</p>
+          <p><strong>🎯 Pro Tip:</strong> Take notes while watching—it helps your brain remember better!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+      // State Management
+      const state = {
+        xp: 0,
+        completedModules: [],
+        badges: [],
+        checkboxes: {},
+        inputs: {},
+      };
+
+      // Initialization
+      document.addEventListener('DOMContentLoaded', () => {
+        loadState();
+        initEventListeners();
+        updateUI();
+      });
+
+      // Core Logic
+      function loadState() {
+        const saved = localStorage.getItem('essayQuestState');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          Object.assign(state, parsed);
+        }
+
+        // Restore Inputs
+        Object.keys(state.inputs).forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.value = state.inputs[id];
+        });
+
+        // Restore Checkboxes
+        document.querySelectorAll('input[type="checkbox"]').forEach((cb, index) => {
+          const id = `cb-${index}`;
+          cb.id = id;
+          if (state.checkboxes[id]) cb.checked = true;
+        });
+
+        // Restore Badges
+        state.badges.forEach((badgeId) => {
+          const el = document.getElementById(badgeId);
+          if (el) el.classList.add('unlocked');
+        });
+
+        // Restore Module Status
+        state.completedModules.forEach((modId) => {
+          document.getElementById(`status-${modId}`).textContent = '✅';
+        });
+      }
+
+      function saveState() {
+        localStorage.setItem('essayQuestState', JSON.stringify(state));
+        updateUI();
+      }
+
+      function initEventListeners() {
+        // Theme Toggle
+        document.getElementById('themeToggle').addEventListener('click', () => {
+          const html = document.documentElement;
+          const current = html.getAttribute('data-theme');
+          html.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+        });
+
+        // Reset
+        document.getElementById('resetBtn').addEventListener('click', () => {
+          if (confirm('Reset all progress? This cannot be undone.')) {
+            localStorage.removeItem('essayQuestState');
+            location.reload();
+          }
+        });
+
+        // Inputs Auto-save
+        document.querySelectorAll('textarea').forEach((area) => {
+          area.addEventListener('input', (e) => {
+            state.inputs[e.target.id] = e.target.value;
+            saveState();
+
+            // Word count for final essay
+            if (e.target.id === 'input-mod6-essay') {
+              const words = e.target.value.trim().split(/\s+/).length;
+              document.getElementById('finalWordCount').textContent = `${e.target.value ? words : 0} words`;
+            }
+          });
+        });
+
+        // Checkboxes & XP
+        document.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+          cb.addEventListener('change', (e) => {
+            const xpVal = parseInt(e.target.dataset.xp);
+            state.checkboxes[e.target.id] = e.target.checked;
+
+            if (e.target.checked) {
+              state.xp += xpVal;
+              confetti({
+                particleCount: 30,
+                spread: 50,
+                origin: { y: 0.6 },
+              });
+            } else {
+              state.xp -= xpVal;
+            }
+            saveState();
+          });
+        });
+      }
+
+      function updateUI() {
+        // Update XP
+        document.getElementById('xpDisplay').textContent = state.xp;
+
+        // Update Progress Bar
+        const totalModules = 6;
+        const currentProgress = (state.completedModules.length / totalModules) * 100;
+        document.getElementById('progressBar').style.width = `${currentProgress}%`;
+      }
+
+      // Interaction Functions
+      function toggleModule(contentId) {
+        const content = document.getElementById(contentId);
+        content.classList.toggle('active');
+      }
+
+      function completeModule(modId, badgeId) {
+        if (!state.completedModules.includes(modId)) {
+          state.completedModules.push(modId);
+          state.badges.push(badgeId);
+
+          document.getElementById(`status-${modId}`).textContent = '✅';
+          document.getElementById(badgeId).classList.add('unlocked');
+
+          // Celebration
+          confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+          });
+
+          // Collapse module after short delay
+          setTimeout(() => {
+            document.getElementById(`${modId}-content`).classList.remove('active');
+          }, 2000);
+
+          saveState();
+        }
+      }
+
+      function exportData() {
+        const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(state));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute('href', dataStr);
+        downloadAnchorNode.setAttribute('download', 'essay_quest_save.json');
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+      }
+
+      // Timer Functions
+      let timerInterval;
+      let timeRemaining = 1800; // 30 minutes in seconds
+
+      function toggleTimer() {
+        const widget = document.getElementById('timerWidget');
+        widget.classList.toggle('active');
+      }
+
+      function startTimer() {
+        if (timerInterval) return; // Already running
+        
+        timerInterval = setInterval(() => {
+          timeRemaining--;
+          updateTimerDisplay();
+          
+          if (timeRemaining <= 0) {
+            pauseTimer();
+            confetti({
+              particleCount: 200,
+              spread: 100,
+              origin: { y: 0.6 }
+            });
+            alert('⏰ Time\'s up! Great job focusing for 30 minutes! Take a break! 🎉');
+            timeRemaining = 1800;
+            updateTimerDisplay();
+          }
+        }, 1000);
+      }
+
+      function pauseTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+
+      function resetTimerFunc() {
+        pauseTimer();
+        timeRemaining = 1800;
+        updateTimerDisplay();
+      }
+
+      function updateTimerDisplay() {
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        document.getElementById('timerDisplay').textContent = 
+          `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+
+      // Modal Functions
+      function showParentDashboard() {
+        const modal = document.getElementById('parentDashboard');
+        modal.classList.add('active');
+        
+        // Update dashboard stats
+        document.getElementById('dashXP').textContent = state.xp;
+        document.getElementById('dashModules').textContent = `${state.completedModules.length}/6`;
+        document.getElementById('dashBadges').textContent = `${state.badges.length}/6`;
+        
+        // Calculate total words written
+        let totalWords = 0;
+        Object.values(state.inputs).forEach(text => {
+          if (text) {
+            totalWords += text.trim().split(/\s+/).length;
+          }
+        });
+        document.getElementById('dashWords').textContent = totalWords;
+      }
+
+      function showSampleLibrary() {
+        document.getElementById('sampleLibrary').classList.add('active');
+      }
+
+      function showVideoTutorials() {
+        document.getElementById('videoTutorials').classList.add('active');
+      }
+
+      function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+      }
+
+      // Close modals on outside click
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.classList.remove('active');
+          }
+        });
+      });
+
+      // Tips Toggle
+      function toggleTips(tipsId) {
+        const content = document.getElementById(tipsId);
+        content.classList.toggle('active');
+      }
+
+      // Timer button listeners
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('startTimer').addEventListener('click', startTimer);
+        document.getElementById('pauseTimer').addEventListener('click', pauseTimer);
+        document.getElementById('resetTimer').addEventListener('click', resetTimerFunc);
+      });
+    </script>
+  
+
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"9b1aa8704fb79cdd","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"version":"2025.9.1","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
+</body></html>
